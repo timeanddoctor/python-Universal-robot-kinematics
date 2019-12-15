@@ -1,5 +1,50 @@
 #!/usr/bin/python2
+'''
+Hi hi,
 
+I don't know if you're still looking for answers but maybe below can help?
+
+Forward Kinematics
+For the Forward Kinematic function "HTrans(th,c )" the "th" variable contains the joint angles of the robotic arm, starting from joints 1 through 6. Just to be safe "th" is best formatted as a Numpy matrix, even if it contains only a single column of information. I say column because it's assuming that your joints are listed as a single column where each row is a single joint angle.
+
+The reason for the "th" being a 6 rows x 8 columns is that "th" can hold information for more than one apparent arm at a single time. The reasoning for this approach becomes more apparent in the Inverse Kinematic step.
+
+Sample Code using Forward Kinematics
+"""Joint Angle (in degrees) reading from encoders."""
+theta1 = np.radians(0.0)
+theta2 = np.radians(170.0)
+theta3 = np.radians(90.0)
+theta4 = np.radians(40.0)
+theta5 = np.radians(90.0)
+theta6 = np.radians(0.0)
+
+th = np.matrix([[theta1], [theta2], [theta3], [theta4], [theta5], [theta6]])
+c = [0]
+location = HTrans(th,c )
+print(location)
+
+End of Code
+The location printout will be in the form common with positional frames in kinematics (see equation 1 or 2 for detail: https://smartech.gatech.edu/bitstream/handle/1853/50782/ur_kin_tech_report_1.pdf). Where P = [px, py, pz] is the Position of the end effector relative to the base location of [0, 0, 0]. The orientation of the 'end effector' at position P is given by three coordinate vectors N, O, and A.
+
+N = [nx, ny, nz] and similarly for O and A.
+
+Inverse Kinematics
+For the Inverse Kinematics it's a similar process as Forward Kinematics only in reverse. The desired position (desired_pos) input is in the same format as the output from the Forward Kinematics solution, as discussed above. The largest difference being the output joint angles given from the 'invKine' function. With the mechanics of inverse kinematics there are multiple solutions to a single end effector position and orientation.
+
+Sample Code using Inverse Kinematics
+desired_pos = np.matrix([[ 3.06161700e-17, 8.66025404e-01, -5.00000000e-01, 3.63537488e-01],
+[-1.00000000e+00, 0.00000000e+00, -5.55111512e-17, -1.09150000e-01],
+[-5.55111512e-17, 5.00000000e-01, 8.66025404e-01, 4.25598256e-01],
+[ 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+
+th = invKine(desired_pos)
+print(th)
+
+End of Code
+This approach gives you 8 possible joint angle configurations that the Arm can have that the specified reach the end effector position and orientation. This is why the output "th" is 6 row x 8 column matrix. Really it is a 6 Joint Angle with 8 possible configurations Matrix. This is where "c" from the Forward Kinematics above comes in. C is just specifying which column of the joint configure matrix "th" you would like to use. Because our example for Forward Kinematics only had joints for a single arm and therefore one column, I set c = [0]. But "c" can equal anything from 0-7 depending on which joint configuration works best for you, as they all have the same end effector location.
+
+Hope this helps!
+'''
 ## UR5/UR10 Inverse Kinematics - Ryan Keating Johns Hopkins University
 
 
